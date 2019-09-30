@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8">
+	<title>Personal</title>
+	<meta name="description" content="">
+	<!-- Mobile Specific Meta -->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<!-- <link rel="shortcut icon" href="img/favicon.png"> -->
+	
+	<link href='http://fonts.googleapis.com/css?family=Lato:300,400,700' rel='stylesheet'>
+	
+	<!-- Syntax Highlighter -->
+	<link rel="stylesheet" type="text/css" href="syntax-highlighter/styles/shCore.css" media="all">
+	<link rel="stylesheet" type="text/css" href="syntax-highlighter/styles/shThemeDefault.css" media="all">
+	
+	<!-- Font Awesome CSS-->
+	<link rel="stylesheet" href="doccss/font-awesome.min.css">
+	<!-- Normalize/Reset CSS-->
+	<link rel="stylesheet" href="doccss/normalize.min.css">
+	<!-- Main CSS-->
+	<link rel="stylesheet" href="doccss/main.css">
+	
+</head>
+
+<body id="welcome">
+	
+	<aside class="left-sidebar">
+		<div class="logo">
+			<a href="index.html">
+				<img src="img/logo.png" alt="">
+			</a>
+		</div>
+		<nav class="left-nav">
+			<ul id="nav">
+				<li class="current"><a href="#welcome">Welcome</a></li>
+				<li><a href="#vip_linux">Virtual IP(VIP)</a></li>
+			</ul>
+		</nav>
+	</aside>
+	
+	<div id="main-wrapper">
+		<div class="main-content">
+			<!-- Welcome section -->
+			<section id="welcome">
+				<div class="content-header">
+					<h1>Linux concepts for developer and sys Admins</h1>
+				</div>
+				<div class="welcome">
+					
+					<h2 class="twenty">Welcome To Linux World</h2>
+					<p>Firstly, a huge thanks for using this Blog, your support is truly appreciated!</p>
+					<p>This Blog covers the basic concepts of Linux that every developer and sys admins should know. If you have any questions that are beyond the scope of this document, feel free to email at <code><a href="mailto:rajks.devops@gmail.com">rajks.devops@gmail.com</a></code> Thank you so much!</p>
+				</div>
+				
+				<div class="features">
+					<h2 class="twenty">Linux Flavour used</h2>
+					
+					<ul>
+						<li>CentOS</li>
+						<li>UBUNTU</li>
+					</ul>
+				</div>
+			</section>
+			
+			<!-- Virtual ip section -->
+			<section id="vip_linux">
+				<div class="content-header">
+					<h1>How to create virtual ip in Linux</h1>
+				</div>
+				<h2 class="title">Steps to create virtual ip in centos8</h2>
+				
+				<div class="section-content">
+					<ol>
+						<li>VIP is an ip address that is not correspond to any physical network interface.</li>
+						<li>If we have only one network interface and want two ip for the same machine then vip is the best option.</li>
+						<li>This method will work for all CentOS system but here all commands are for centos8 installed in virtualbox with Hostonly network.</li>
+					</ol>
+				</div>
+				<p>First check your network interface name by the below command</p>
+				<pre class="brush: bash">
+					# ip a
+					enp0s3: <> mtu 1500 group default qlen 1
+					    link/ether 00:09:0f:fe:00:01
+					    inet 192.168.56.150 brd 192.168.56.1 scope global static
+					       valid_lft forever preferred_lft forever
+					    inet6 fe80::61c1:41e9:c856:5611/64 scope global static
+					       valid_lft forever preferred_lft forever
+				</pre>
+				<p>Here <b>enp0s3</b> is your Ethernet adapter name.</p>
+				<p>Now go to network config file path and copy your ifcfg-enp0s3 to ifcfg-enp0s3:0 and edit the config file accordingly.</p>
+				<pre class="brush: bash">
+					# cd /etc/sysconfig/network-script
+					# cp ifcfg-eth1 ifcfg-enp0s3:0
+
+					# vi ifcfg-enp0s3
+					    TYPE=Ethernet
+					    BOOTPROTO=none
+					    NAME="enp0s3"
+					    DEVICE="enp0s3"
+					    ONBOOT=yes
+					    IPADDR=192.168.56.150
+					    NETMASK=255.255.255.0
+					    GATEWAY=192.168.56.1
+
+					# vi ifcfg-enp0s3:0
+					    TYPE=Ethernet
+					    BOOTPROTO=none
+					    NAME="enp0s3:0"
+					    DEVICE="enp0s3:0"
+					    ONBOOT=yes
+					    IPADDR=192.168.56.200
+					    NETMASK=255.255.255.0
+					    GATEWAY=192.168.56.1
+				</pre>
+				<p>Reboot your system. After reboot check your ip configuration.</p>
+				<pre class="brush: bash">
+					# ip a
+					enp0s3: <> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+					    link/ether 08:00:27:d0:4a:2d brd ff:ff:ff:ff:ff:ff
+					    inet 192.168.56.150/24 brd 192.168.56.255 scope global noprefixroute enp0s8
+					       valid_lft forever preferred_lft forever
+					    inet 192.168.56.200/32 scope global enp0s8
+					       valid_lft forever preferred_lft forever
+					    inet 192.168.56.200/24 brd 192.168.56.255 scope global secondary noprefixroute enp0s8:0
+					       valid_lft forever preferred_lft forever
+					    inet6 fe80::a00:27ff:fed0:4a2d/64 scope link
+					       valid_lft forever preferred_lft forever
+				</pre>
+				<p>Here you can see that your virtual ip 192.168.56.200 is present. You can ping both ip from another machine and verify that its working. From host machine you can check like this.</p>
+				<pre class="brush: bash">
+					# ping 192.168.56.150
+					# ping 192.168.56.200
+				</pre>
+				<p>Congratulations! You have created your first vip in centos8.</p>
+			</section>
+
+			<!--  -->
+		</div>
+	</div>
+	
+	
+	<!-- Essential JavaScript Libraries
+	==============================================-->
+	<script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
+	<script type="text/javascript" src="js/jquery.nav.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shCore.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushXml.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushCss.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushJScript.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushPhp.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushPython.js"></script>
+	<script type="text/javascript" src="syntax-highlighter/scripts/shBrushBash.js"></script>
+	<script type="text/javascript">
+	SyntaxHighlighter.all()
+	</script>
+	<script type="text/javascript" src="js/custom.js"></script>
+	
+</body>
+</html>
